@@ -14,6 +14,17 @@ export function wasPosted(videoId: string, type: YoutubePostType): boolean {
     );
 }
 
+export function wasLiveRelated(videoId: string): boolean {
+    return db.data.posted.some(
+        item =>
+            item.videoId === videoId &&
+            (
+                item.type === 'upcoming_live' ||
+                item.type === 'live'
+            ),
+    );
+}
+
 export async function markPosted(videoId: string, type: YoutubePostType): Promise<void> {
     db.data.posted.push({
         videoId,
