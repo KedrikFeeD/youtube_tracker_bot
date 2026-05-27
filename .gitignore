@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+
+# env
+.env
+
+# logs
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# generated db
+db.json
+
+# TypeScript
+*.tsbuildinfo
