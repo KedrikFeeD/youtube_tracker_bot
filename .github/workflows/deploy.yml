@@ -21,5 +21,5 @@ jobs:
             git pull origin master
             npm ci
             npm run build
-            pm2 restart youtube-tracker-bot
+            NODE_OPTIONS=--dns-result-order=ipv4first pm2 restart youtube-tracker-bot --update-env
             pm2 save
