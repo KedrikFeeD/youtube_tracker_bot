@@ -1,8 +1,10 @@
 import { Telegraf } from 'telegraf';
+import { SocksProxyAgent } from 'socks-proxy-agent';
 import type { YoutubeItem } from './youtube.js';
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const channelId = process.env.TELEGRAM_CHANNEL_ID;
+const proxyUrl = process.env.TELEGRAM_PROXY_URL;
 
 if (!token) {
     throw new Error('TELEGRAM_BOT_TOKEN is not set');
@@ -12,7 +14,15 @@ if (!channelId) {
     throw new Error('TELEGRAM_CHANNEL_ID is not set');
 }
 
-export const bot = new Telegraf(token);
+const telegramOptions = proxyUrl
+    ? {
+        telegram: {
+            agent: new SocksProxyAgent(proxyUrl),
+        },
+    }
+    : undefined;
+
+export const bot = new Telegraf(token, telegramOptions);
 
 function getTitle(type: YoutubeItem['type']): string {
     switch (type) {

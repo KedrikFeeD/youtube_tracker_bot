@@ -54,6 +54,9 @@ cp .env.example .env
 ### Пример `.env`
 
 ```env
+# Telegram proxy
+TELEGRAM_PROXY_URL=
+
 # Telegram bot token from @BotFather
 TELEGRAM_BOT_TOKEN=
 
