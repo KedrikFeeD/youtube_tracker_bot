@@ -22,3 +22,4 @@ jobs:
             npm ci
             npm run build
             pm2 restart youtube-tracker-bot
+            pm2 save
