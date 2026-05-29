@@ -27,11 +27,11 @@ export const bot = new Telegraf(token, telegramOptions);
 function getTitle(type: YoutubeItem['type']): string {
     switch (type) {
         case 'video':
-            return 'Новое видео';
+            return '🎬 Новое видео';
         case 'upcoming_live':
-            return 'Запланирована трансляция';
+            return '📅 Запланирована трансляция';
         case 'live':
-            return 'Трансляция началась';
+            return '🔴 Трансляция началась!';
     }
 }
 
@@ -61,19 +61,6 @@ function getExtraMessageLines(item: YoutubeItem): string[] {
         ];
     }
 
-    if (item.type === 'live') {
-        const actualStartTime =
-            formatDateTime(item.actualStartTime);
-
-        if (!actualStartTime) {
-            return [];
-        }
-
-        return [
-            `🔴 Трансляция началась! Залетай к нам`,
-        ];
-    }
-
     return [];
 }
 
@@ -84,6 +71,7 @@ export async function postToTelegram(item: YoutubeItem): Promise<void> {
         `<b>${getTitle(item.type)}</b>`,
         '',
         `<b>${escapeHtml(item.title)}</b>`,
+        '',
         ...extraLines,
         '',
         item.url,
