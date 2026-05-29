@@ -35,20 +35,61 @@ function getTitle(type: YoutubeItem['type']): string {
     }
 }
 
-export async function postToTelegram(item: YoutubeItem): Promise<void> {
-    if (!channelId) {
-        throw new Error('channelId must be provided');
+function formatDateTime(value?: string): string | null {
+    if (!value) {
+        return null;
     }
+
+    return new Date(value).toLocaleString('ru-RU', {
+        dateStyle: 'long',
+        timeStyle: 'short',
+        timeZone: 'Europe/Moscow',
+    });
+}
+
+function getExtraMessageLines(item: YoutubeItem): string[] {
+    if (item.type === 'upcoming_live') {
+        const scheduledStartTime =
+            formatDateTime(item.scheduledStartTime);
+
+        if (!scheduledStartTime) {
+            return [];
+        }
+
+        return [
+            `🕒 Начало: ${scheduledStartTime} МСК`,
+        ];
+    }
+
+    if (item.type === 'live') {
+        const actualStartTime =
+            formatDateTime(item.actualStartTime);
+
+        if (!actualStartTime) {
+            return [];
+        }
+
+        return [
+            `🔴 Трансляция началась! Залетай к нам`,
+        ];
+    }
+
+    return [];
+}
+
+export async function postToTelegram(item: YoutubeItem): Promise<void> {
+    const extraLines = getExtraMessageLines(item);
 
     const text = [
         `<b>${getTitle(item.type)}</b>`,
         '',
         `<b>${escapeHtml(item.title)}</b>`,
+        ...extraLines,
         '',
         item.url,
     ].join('\n');
 
-    await bot.telegram.sendMessage(channelId, text, {
+    await bot.telegram.sendMessage(channelId!, text, {
         parse_mode: 'HTML',
         link_preview_options: {
             is_disabled: false,

@@ -20,6 +20,8 @@ export interface YoutubeItem {
     channelTitle: string;
     url: string;
     type: YoutubePostType;
+    scheduledStartTime?: string | undefined;
+    actualStartTime?: string | undefined;
 }
 
 interface PlaylistItemResponse {
@@ -108,6 +110,10 @@ async function enrichVideoTypes(
         .map(item => item.videoId)
         .join(',');
 
+    if (!ids) {
+        return items;
+    }
+
     const response = await axios.get<VideosResponse>(
         'https://www.googleapis.com/youtube/v3/videos',
         {
@@ -132,10 +138,18 @@ async function enrichVideoTypes(
         const broadcast =
             details?.snippet.liveBroadcastContent;
 
+        const scheduledStartTime =
+            details?.liveStreamingDetails?.scheduledStartTime;
+
+        const actualStartTime =
+            details?.liveStreamingDetails?.actualStartTime;
+
         if (broadcast === 'upcoming') {
             return {
                 ...item,
                 type: 'upcoming_live',
+                scheduledStartTime,
+                actualStartTime,
             };
         }
 
@@ -143,12 +157,16 @@ async function enrichVideoTypes(
             return {
                 ...item,
                 type: 'live',
+                scheduledStartTime,
+                actualStartTime,
             };
         }
 
         return {
             ...item,
             type: 'video',
+            scheduledStartTime,
+            actualStartTime,
         };
     });
 }
@@ -157,4 +175,28 @@ export async function getYoutubeItems(): Promise<YoutubeItem[]> {
     const items = await getPlaylistItems();
 
     return enrichVideoTypes(items);
+}
+
+export async function getLatestVideos(): Promise<YoutubeItem[]> {
+    const items = await getYoutubeItems();
+
+    return items.filter(
+        item => item.type === 'video',
+    );
+}
+
+export async function getUpcomingLives(): Promise<YoutubeItem[]> {
+    const items = await getYoutubeItems();
+
+    return items.filter(
+        item => item.type === 'upcoming_live',
+    );
+}
+
+export async function getActiveLives(): Promise<YoutubeItem[]> {
+    const items = await getYoutubeItems();
+
+    return items.filter(
+        item => item.type === 'live',
+    );
 }
