@@ -61,6 +61,7 @@ function getExtraMessageLines(item: YoutubeItem): string[] {
 
         return [
             `🕒 Начало: ${scheduledStartTime} МСК`,
+            '',
         ];
     }
 
@@ -88,7 +89,6 @@ export async function postToTelegram(item: YoutubeItem): Promise<void> {
         `<b>${escapeHtml(item.title)}</b>`,
         '',
         ...extraLines,
-        '',
         `${getPreparedMessageLinks(item)}`,
     ].join('\n');
 
