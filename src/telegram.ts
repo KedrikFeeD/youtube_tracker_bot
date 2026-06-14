@@ -1,6 +1,7 @@
 import { Telegraf } from 'telegraf';
 import { SocksProxyAgent } from 'socks-proxy-agent';
 import type { YoutubeItem } from './youtube.js';
+import { EVideoType } from './enums/video-type.enums.js';
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const channelId = process.env.TELEGRAM_CHANNEL_ID;
@@ -26,12 +27,14 @@ export const bot = new Telegraf(token, telegramOptions);
 
 function getTitle(type: YoutubeItem['type']): string {
     switch (type) {
-        case 'video':
+        case EVideoType.Video:
             return '🎬 Новое видео';
-        case 'upcoming_live':
+        case EVideoType.UpcomingLive:
             return '📅 Запланирована трансляция';
-        case 'live':
+        case EVideoType.Live:
             return '🔴 Трансляция началась!';
+        default:
+            return '';
     }
 }
 
@@ -48,7 +51,7 @@ function formatDateTime(value?: string): string | null {
 }
 
 function getExtraMessageLines(item: YoutubeItem): string[] {
-    if (item.type === 'upcoming_live') {
+    if (item.type === EVideoType.UpcomingLive) {
         const scheduledStartTime =
             formatDateTime(item.scheduledStartTime);
 
@@ -64,6 +67,18 @@ function getExtraMessageLines(item: YoutubeItem): string[] {
     return [];
 }
 
+function getPreparedMessageLinks(item: YoutubeItem): string {
+    switch (item.type) {
+        case EVideoType.Video:
+            return `🔗 <a href="${item.url}">Смотреть видео на YouTube</a>`
+        case EVideoType.UpcomingLive:
+        case EVideoType.Live:
+            return `🔗 <a href="${item.url}">YouTube</a> | <a href="https://www.twitch.tv/kedrikroot">Twitch</a>`
+        default:
+            return `🔗 <a href="${item.url}">Смотреть видео на YouTube</a>`
+    }
+}
+
 export async function postToTelegram(item: YoutubeItem): Promise<void> {
     const extraLines = getExtraMessageLines(item);
 
@@ -74,7 +89,7 @@ export async function postToTelegram(item: YoutubeItem): Promise<void> {
         '',
         ...extraLines,
         '',
-        item.url,
+        `${getPreparedMessageLinks(item)}`,
     ].join('\n');
 
     await bot.telegram.sendMessage(channelId!, text, {
