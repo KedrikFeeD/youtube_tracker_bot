@@ -7,6 +7,7 @@ import {
     wasPosted
 } from './db.js';
 import { postToTelegram } from './telegram.js';
+import {isShort} from "./helpers/shorts-video.helper.js";
 
 const cronExpression = process.env.CHECK_CRON ?? '*/1 * * * *';
 
@@ -33,7 +34,8 @@ async function checkYoutube(): Promise<void> {
     for (const item of items.reverse()) {
         if (
             wasPosted(item.videoId, item.type) ||
-            !isRecentVideo(item.publishedAt, 24)
+            !isRecentVideo(item.publishedAt, 24) ||
+            isShort(item)
         ) {
             continue;
         }
