@@ -1,12 +1,5 @@
-import { JSONFilePreset } from 'lowdb/node';
-import type { Low } from 'lowdb';
-import type { DbSchema, YoutubePostType } from './types.js';
-
-const defaultData: DbSchema = {
-    posted: [],
-};
-
-export const db: Low<DbSchema> = await JSONFilePreset<DbSchema>('db.json', defaultData);
+import type { YoutubePostType } from '../domain/types.js';
+import { db } from './database.js';
 
 export function wasPosted(videoId: string, type: YoutubePostType): boolean {
     return db.data.posted.some(
@@ -25,7 +18,10 @@ export function wasLiveRelated(videoId: string): boolean {
     );
 }
 
-export async function markPosted(videoId: string, type: YoutubePostType): Promise<void> {
+export async function markPosted(
+    videoId: string,
+    type: YoutubePostType,
+): Promise<void> {
     db.data.posted.push({
         videoId,
         type,

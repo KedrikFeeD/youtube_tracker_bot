@@ -1,16 +1,6 @@
 import axios from 'axios';
-import type { YoutubePostType } from './types.js';
-
-const apiKey = process.env.YOUTUBE_API_KEY;
-const channelId = process.env.YOUTUBE_CHANNEL_ID;
-
-if (!apiKey) {
-    throw new Error('YOUTUBE_API_KEY is not set');
-}
-
-if (!channelId) {
-    throw new Error('YOUTUBE_CHANNEL_ID is not set');
-}
+import type { YoutubePostType } from './domain/types.js';
+import { youtubeConfig } from './config/env.js';
 
 export interface YoutubeItem {
     videoId: string;
@@ -56,8 +46,8 @@ async function getUploadsPlaylistId(): Promise<string> {
         'https://www.googleapis.com/youtube/v3/channels',
         {
             params: {
-                key: apiKey,
-                id: channelId,
+                key: youtubeConfig.apiKey,
+                id: youtubeConfig.channelId,
                 part: 'contentDetails',
             },
         },
@@ -80,7 +70,7 @@ async function getPlaylistItems(): Promise<YoutubeItem[]> {
         'https://www.googleapis.com/youtube/v3/playlistItems',
         {
             params: {
-                key: apiKey,
+                key: youtubeConfig.apiKey,
                 playlistId,
                 part: 'snippet',
                 maxResults: 10,
@@ -118,7 +108,7 @@ async function enrichVideoTypes(
         'https://www.googleapis.com/youtube/v3/videos',
         {
             params: {
-                key: apiKey,
+                key: youtubeConfig.apiKey,
                 id: ids,
                 part: 'snippet,liveStreamingDetails',
             },
