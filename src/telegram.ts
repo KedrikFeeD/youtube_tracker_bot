@@ -5,7 +5,12 @@ import { EVideoType } from './enums/video-type.enums.js';
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const channelId = process.env.TELEGRAM_CHANNEL_ID;
-const proxyUrl = process.env.TELEGRAM_PROXY_URL;
+
+const proxyEnabled =
+    process.env.TELEGRAM_PROXY_ENABLED === 'true';
+
+const proxyUrl =
+    process.env.TELEGRAM_PROXY_URL;
 
 if (!token) {
     throw new Error('TELEGRAM_BOT_TOKEN is not set');
@@ -15,10 +20,16 @@ if (!channelId) {
     throw new Error('TELEGRAM_CHANNEL_ID is not set');
 }
 
-const telegramOptions = proxyUrl
+if (proxyEnabled && !proxyUrl) {
+    throw new Error(
+        'TELEGRAM_PROXY_URL is required when TELEGRAM_PROXY_ENABLED=true',
+    );
+}
+
+const telegramOptions = proxyEnabled
     ? {
         telegram: {
-            agent: new SocksProxyAgent(proxyUrl),
+            agent: new SocksProxyAgent(proxyUrl!),
         },
     }
     : undefined;
